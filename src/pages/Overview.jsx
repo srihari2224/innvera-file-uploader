@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
+import FilesSection from "../components/FilesSection"
 
 const Overview = () => {
   const [activeTab, setActiveTab] = useState("session")
@@ -141,67 +142,86 @@ const Overview = () => {
   }
 
   return (
-    <div className="tabbed-section">
-      <div className="tab-header">
-        <div className="tabs">
-          <button
-            className={`tab-btn ${activeTab === "session" ? "active" : ""}`}
-            onClick={() => setActiveTab("session")}
-          >
-            Session
-          </button>
-          <button
-            className={`tab-btn ${activeTab === "coupen" ? "active" : ""}`}
-            onClick={() => setActiveTab("coupen")}
-          >
-            Coupens
-          </button>
-        </div>
-      </div>
-
-      <div className={`tab-content ${activeTab === "session" ? "active" : ""}`}>
-        <div className="session-content">
-          <div className="session-input">
-            <input type="text" value={`Session: ${sessionId}`} readOnly />
-          </div>
-          <div className="choose-files-container">
-            <img src="/folder-icon.png" alt="Folder" className="files-icon" />
-            <button className="choose-files-btn" onClick={handleFileUpload}>
-              Choose Files
+    <div className="overview-container">
+      <div className="tabbed-section">
+        <div className="tab-header">
+          <div className="tabs">
+            <button
+              className={`tab-btn ${activeTab === "session" ? "active" : ""}`}
+              onClick={() => setActiveTab("session")}
+            >
+              Session
+            </button>
+            <button
+              className={`tab-btn ${activeTab === "coupen" ? "active" : ""}`}
+              onClick={() => setActiveTab("coupen")}
+            >
+              Coupens
             </button>
           </div>
-          <input
-            type="file"
-            id="fileInput"
-            multiple
-            accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp"
-            onChange={(e) => handleFiles(e.target.files)}
-            style={{ display: "none" }}
-          />
+        </div>
+
+        <div className={`tab-content ${activeTab === "session" ? "active" : ""}`}>
+          <div className="session-content">
+            <div className="session-input">
+              <input type="text" value={`Session: ${sessionId}`} readOnly />
+            </div>
+            <div className="choose-files-container">
+              <img src="/folder-icon.png" alt="Folder" className="files-icon" />
+              <button className="choose-files-btn" onClick={handleFileUpload}>
+                Choose Files
+              </button>
+            </div>
+            <input
+              type="file"
+              id="fileInput"
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp"
+              onChange={(e) => handleFiles(e.target.files)}
+              style={{ display: "none" }}
+            />
+          </div>
+        </div>
+
+        <div className={`tab-content ${activeTab === "coupen" ? "active" : ""}`}>
+          <div className="coupen-content">
+            <h3>Coupen Codes</h3>
+            <div className="coupen-images-container">
+              {[0, 1, 2].map((index) => (
+                <div key={index} className="coupen-image-box">
+                  <div className="coupen-placeholder">
+                    Image {index + 1}
+                    <br />
+                    Paste URL below
+                  </div>
+                  <input
+                    type="text"
+                    className="coupen-url-input"
+                    placeholder="Paste 64-bit image URL here..."
+                    onChange={(e) => loadCoupenImage(e.target, index)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className={`tab-content ${activeTab === "coupen" ? "active" : ""}`}>
-        <div className="coupen-content">
-          <h3>Coupen Codes</h3>
-          <div className="coupen-images-container">
-            {[0, 1, 2].map((index) => (
-              <div key={index} className="coupen-image-box">
-                <div className="coupen-placeholder">
-                  Image {index + 1}
-                  <br />
-                  Paste URL below
-                </div>
-                <input
-                  type="text"
-                  className="coupen-url-input"
-                  placeholder="Paste 64-bit image URL here..."
-                  onChange={(e) => loadCoupenImage(e.target, index)}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Added FilesSection component to Overview page */}
+      <FilesSection />
+
+      <div className="footer-links">
+        <a href="/terms" className="footer-link">
+          Terms of Service
+        </a>
+        <span className="footer-separator">|</span>
+        <a href="/privacy" className="footer-link">
+          Privacy Policy
+        </a>
+        <span className="footer-separator">|</span>
+        <a href="/refund" className="footer-link">
+          Refund & Cancellation Policy
+        </a>
       </div>
     </div>
   )

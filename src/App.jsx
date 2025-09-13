@@ -6,7 +6,9 @@ import Demo from "./pages/Demo"
 import Social from "./pages/Social"
 import Activity from "./pages/Activity"
 import About from "./pages/About"
-import FilesSection from "./components/FilesSection"
+import TermsOfService from "./pages/TermsOfService"
+import PrivacyPolicy from "./pages/PrivacyPolicy"
+import RefundPolicy from "./pages/RefundPolicy"
 import TicketDetailModal from "./components/TicketDetailModal"
 import { AuthProvider } from "./context/AuthContext"
 import "./App.css"
@@ -26,9 +28,11 @@ function App() {
               <Route path="/social" element={<Social />} />
               <Route path="/activity" element={<Activity />} />
               <Route path="/about" element={<About />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/refund" element={<RefundPolicy />} />
             </Routes>
           </main>
-          <FilesSection />
           <TicketDetailModal />
         </div>
       </Router>
