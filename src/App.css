@@ -1,0 +1,984 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+  background: #0a0a0a;
+  color: #ededed;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Header */
+.header {
+  background: #0a0a0a;
+  border-bottom: 1px solid #262626;
+  padding: 16px 0;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #0be1f0, #0d6dc2);
+  border-radius: 50%;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ededed;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.header-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-btn:hover {
+  background: #1a1a1a;
+}
+
+.header-btn img,
+.header-btn svg,
+.menu-icon {
+  width: 20px;
+  height: 20px;
+  opacity: 0.85;
+  display: block;
+  line-height: 0;
+}
+
+/* Added styles for authentication section */
+.auth-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-info {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #1a1a1a;
+  border-radius: 6px;
+  border: 1px solid #333333;
+}
+
+.user-info.visible {
+  display: flex;
+}
+
+.user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.user-name {
+  font-size: 14px;
+  color: #ededed;
+  font-weight: 500;
+}
+
+.sign-out-btn {
+  background: #ff4444;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sign-out-btn:hover {
+  background: #ff6666;
+}
+
+.google-signin-container {
+  display: flex;
+  align-items: center;
+}
+
+/* Navigation */
+.nav {
+  background: #0a0a0a;
+  border-bottom: 1px solid #262626;
+  padding: 0;
+}
+
+.nav-content {
+  display: flex;
+  gap: 25px;
+}
+
+.nav-item {
+  padding: 12px 0;
+  color: #888;
+  text-decoration: none;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.nav-item.active {
+  color: #ededed;
+  border-bottom-color: #ededed;
+}
+
+/* Main Content */
+.main {
+  padding: 20px 0;
+}
+
+/* Tabbed Section */
+.tabbed-section {
+  background: #0a0a0a;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tab-header {
+  display: flex;
+  justify-content: center;
+  background: #0a0a0a;
+  border-bottom: 1px solid #262626;
+  padding: 16px;
+}
+
+.tabs {
+  display: flex;
+  background: #1a1a1a;
+  border-radius: 12px;
+  border: 1px solid #333333;
+  padding: 2px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  padding: 12px 24px;
+  color: #888;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  text-align: center;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.tab-btn.active {
+  background: #2a2a2a;
+  color: #ededed;
+}
+
+.tab-btn:hover:not(.active) {
+  color: #ccc;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-content {
+  display: none;
+  padding: 20px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Session Tab Content */
+.session-display {
+  background: #111111;
+  border: 1px solid #333333;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+  font-size: 13px;
+  color: #888888;
+  margin-bottom: 16px;
+}
+
+.session-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+
+.session-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.session-input span {
+  font-size: 14px;
+  color: #ededed;
+  font-weight: 500;
+}
+
+.session-input input {
+  background: #1a1a1a;
+  color: #ededed;
+  border: 1px solid #333333;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: not-allowed;
+}
+
+.choose-files-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+
+.files-icon {
+  width: 32px;
+}
+
+.innvera {
+  width: 90px;
+  height: 30px;
+}
+
+.choose-files-btn {
+  background: rgb(255, 255, 255);
+  color: #0a0a0a;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.choose-files-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+
+.choose-files-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Added styles for coupon codes section with three image containers */
+.coupen-content {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.coupen-content h3 {
+  margin-bottom: 24px;
+  color: #ededed;
+}
+
+.coupen-images-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+
+.coupen-image-box {
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+  height: 200px;
+  background: #111111;
+  border: 2px dashed #333333;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.coupen-image-box:hover {
+  border-color: #555555;
+  background: #1a1a1a;
+}
+
+.coupen-image-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.coupen-placeholder {
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
+.coupen-url-input {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  background: #0a0a0a;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #ededed;
+  font-family: monospace;
+}
+
+.coupen-url-input::placeholder {
+  color: #666;
+}
+
+/* Files Section */
+.files-section {
+  margin: 20px;
+  padding: 0;
+}
+
+.files-title {
+  color: #ededed;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-left: 4px;
+}
+
+/* Files Grid */
+.files-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.file-card {
+  background: #111111;
+  border: 1px solid #333333;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+}
+
+.file-card:hover {
+  background: #1a1a1a;
+  border-color: #444444;
+}
+
+.file-icon img {
+  width: 24px;
+  height: 28px;
+  opacity: 0.8;
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 14px;
+  color: #ededed;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-status {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.file-status.success {
+  color: #00d4aa;
+}
+
+.file-status.error {
+  color: #ff6b6b;
+}
+
+.file-status.processing {
+  color: #ffa500;
+}
+
+/* Added styles for social media links and printit powered by section */
+.social-links {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 20px;
+  padding: 16px;
+  background: #111111;
+  border-radius: 8px;
+  border: 1px solid #333333;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #888;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.social-link:hover {
+  background: #1a1a1a;
+  color: #ededed;
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.printit-section {
+  margin-top: 32px;
+  padding: 20px;
+  background: #111111;
+  border-radius: 8px;
+  border: 1px solid #333333;
+  text-align: center;
+}
+
+.printit-title {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #ededed;
+  margin-bottom: 16px;
+}
+
+.printit-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.printit-logo-container {
+  flex: 1;
+  min-width: 120px;
+  max-width: 150px;
+  height: 80px;
+  background: #0a0a0a;
+  border: 2px dashed #333333;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.printit-logo-container:hover {
+  border-color: #555555;
+  background: #1a1a1a;
+}
+
+.printit-logo-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.printit-placeholder {
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+  padding: 10px;
+}
+
+.printit-url-input {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  background: #0a0a0a;
+  border: 1px solid #333333;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10px;
+  color: #ededed;
+  font-family: monospace;
+}
+
+.printit-url-input::placeholder {
+  color: #666;
+}
+
+/* Added empty page styling for demo, activity, about us */
+.empty-page {
+  text-align: center;
+  padding: 60px 20px;
+  color: #888;
+}
+
+.empty-page h2 {
+  color: #ededed;
+  margin-bottom: 8px;
+}
+
+/* Added ticket system styles with black and white colors only */
+.activity-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.raise-ticket-container {
+  margin-bottom: 30px;
+}
+
+.raise-ticket-bar {
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 8px;
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ededed;
+}
+
+.raise-ticket-bar:hover {
+  background: #262626;
+  border-color: #444444;
+}
+
+.expand-icon {
+  transition: transform 0.3s ease;
+  font-size: 12px;
+  color: #888;
+}
+
+.expand-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.ticket-form-container {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: #111111;
+  border: 1px solid #333333;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.ticket-form-container.expanded {
+  max-height: 800px;
+}
+
+.ticket-form {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ededed;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #ededed;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #555555;
+}
+
+.form-group input[readonly] {
+  background: #0a0a0a;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.image-upload-group {
+  margin-bottom: 16px;
+}
+
+.image-upload-container {
+  border: 2px dashed #333333;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  background: #0a0a0a;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.image-upload-container:hover {
+  border-color: #555555;
+  background: #1a1a1a;
+}
+
+.image-upload-container.dragover {
+  border-color: #777777;
+  background: #262626;
+}
+
+.upload-icon {
+  font-size: 24px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.upload-text {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.upload-subtext {
+  font-size: 12px;
+  color: #666;
+}
+
+.image-preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.image-preview {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border: 1px solid #333333;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-image {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-btn {
+  background: #ededed;
+  color: #0a0a0a;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #d0d0d0;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.my-tickets-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ededed;
+  margin: 30px 0 15px 0;
+}
+
+.tickets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ticket-item {
+  background: #111111;
+  border: 1px solid #333333;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s;
+}
+
+.ticket-item:hover {
+  background: #1a1a1a;
+  border-color: #444444;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ticket-id {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ededed;
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+}
+
+.ticket-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.ticket-status.pending {
+  background: #333333;
+  color: #ededed;
+}
+
+.ticket-status.closed {
+  background: #666666;
+  color: #ededed;
+}
+
+.ticket-query {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.ticket-date {
+  font-size: 12px;
+  color: #888;
+}
+
+.auth-message {
+  padding: 20px;
+  text-align: center;
+}
+
+.auth-message p {
+  color: #888;
+  font-size: 14px;
+}
+
+/* Added admin ticket styles */
+.admin-activity {
+  background: white !important;
+  color: black !important;
+}
+
+.admin-activity h2 {
+  color: black !important;
+}
+
+.ticket-card {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ticket-card:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-info {
+  flex: 1;
+}
+
+.ticket-email {
+  color: #007bff;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ticket-query-preview {
+  color: #6c757d;
+  font-size: 12px;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-open {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-closed {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+/* Added ticket detail modal styles */
+.ticket-detail-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.ticket-detail-content {
+  background-color: white;
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: black;
+}
+
+.ticket-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 10px;
+}
+
+.close-detail {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6c757d;
+}
+
+.ticket-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.ticket-image {
+  max-width: 150px;
+  max-height: 150px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
