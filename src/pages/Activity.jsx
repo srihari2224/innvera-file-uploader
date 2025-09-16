@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 
-const Activity = () => {
-  const { currentUser, isAdmin, allTickets } = useAuth()
+const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => {
+  const { currentUser } = useAuth()
   const [isFormExpanded, setIsFormExpanded] = useState(false)
   const [ticketImages, setTicketImages] = useState([])
   const [formData, setFormData] = useState({
@@ -75,6 +75,7 @@ const Activity = () => {
           file: file,
           dataUrl: e.target.result,
           name: file.name,
+          type: file.type, // Add file type for proper handling
         }
 
         setTicketImages((prev) => [...prev, imageData])
@@ -87,6 +88,15 @@ const Activity = () => {
     setTicketImages((prev) => prev.filter((_, i) => i !== index))
   }
 
+  const fixS3Url = (url) => {
+    if (!url) return url
+    // Convert old format to new format
+    if (url.includes("s3.amazonaws.com/innvera-tickets/")) {
+      return url.replace("s3.amazonaws.com/innvera-tickets/", "innvera-tickets.s3.amazonaws.com/")
+    }
+    return url
+  }
+
   const submitTicket = async (event) => {
     event.preventDefault()
 
@@ -96,24 +106,37 @@ const Activity = () => {
     }
 
     try {
-      const urlParams = new URLSearchParams(window.location.search)
-      const sessionId = urlParams.get("session") || "session" + Math.floor(Math.random() * 1000000)
-      const ticketId = "tkt_" + Math.random().toString(36).substr(2, 9)
+      let sessionIdForTicket
+
+      if (sessionFromUrl) {
+        sessionIdForTicket = sessionFromUrl
+      } else {
+        sessionIdForTicket = "session" + Math.floor(Math.random() * 1000000)
+      }
+
+      // Prepare images as base64 data for upload to Lambda
+      const imagesForUpload = await Promise.all(
+        ticketImages.map(async (img) => {
+          return {
+            type: img.type,
+            data: img.dataUrl,
+            name: img.name
+          }
+        })
+      )
 
       const ticketData = {
-        session_id: sessionId,
-        created_at: new Date().toISOString(),
+        session_id: sessionIdForTicket,
         gmail: currentUser.email,
-        images: ticketImages.map((img) => `https://s3.amazonaws.com/innvera-tickets/ticket-${ticketId}/${img.name}`),
         name: currentUser.name,
         phone_number: formData.phone,
         query: formData.query,
-        status: "open",
-        ticket_id: ticketId,
+        images: imagesForUpload, // Send base64 images to Lambda for processing
       }
 
-      console.log("[v0] Submitting ticket with session:", sessionId)
-      console.log("[v0] Ticket data:", ticketData)
+      console.log("[v0] Submitting ticket with session_id:", sessionIdForTicket)
+      console.log("[v0] URL session parameter:", sessionFromUrl || "none")
+      console.log("[v0] Ticket data:", { ...ticketData, images: `${imagesForUpload.length} images` })
 
       const response = await fetch("https://xrcya6btq7.execute-api.ap-south-1.amazonaws.com/prod/", {
         method: "POST",
@@ -127,14 +150,14 @@ const Activity = () => {
         const result = await response.json()
         console.log("[v0] Ticket submitted successfully:", result)
 
-        // Reset form
         setFormData({ phone: "", query: "", email: currentUser.email, name: currentUser.name })
         setTicketImages([])
         setIsFormExpanded(false)
 
         alert("Ticket submitted successfully!")
       } else {
-        throw new Error("Failed to submit ticket")
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to submit ticket")
       }
     } catch (error) {
       console.error("[v0] Error submitting ticket:", error)
@@ -143,7 +166,7 @@ const Activity = () => {
   }
 
   const showTicketDetail = (ticketId) => {
-    const ticket = allTickets.find((t) => t.ticket_id === ticketId)
+    const ticket = (adminTickets || []).find((t) => t.ticket_id === ticketId)
     if (!ticket) return
 
     const modal = document.getElementById("ticketDetailModal")
@@ -156,7 +179,7 @@ const Activity = () => {
     if (ticket.images && ticket.images.length > 0) {
       imagesHtml = `
         <div class="ticket-images">
-          ${ticket.images.map((img) => `<img src="${img}" alt="Ticket Image" class="ticket-image">`).join("")}
+          ${ticket.images.map((img) => `<img src="${fixS3Url(img)}" alt="Ticket Image" class="ticket-image" style="max-width: 200px; max-height: 200px; margin: 5px; border-radius: 4px; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" /><div style="display:none; padding: 10px; background: #f8f9fa; border-radius: 4px; text-align: center; color: #6c757d;">Image failed to load</div>`).join("")}
         </div>
       `
     }
@@ -196,47 +219,64 @@ const Activity = () => {
     window.open(`mailto:${email}`, "_blank")
   }
 
-  if (isAdmin) {
+  if (isAdmin && adminCheckDone) {
     return (
       <div className="activity-container admin-activity">
         <h2 style={{ color: "black", marginBottom: "20px", fontSize: "18px", fontWeight: "600" }}>
           Admin - Support Tickets
         </h2>
         <div id="ticketsList">
-          {allTickets.length === 0 ? (
+          {adminTickets === null ? (
+            <p style={{ color: "#6c757d", textAlign: "center", padding: "20px" }}>Loading tickets...</p>
+          ) : adminTickets.length === 0 ? (
             <p style={{ color: "#6c757d", textAlign: "center", padding: "20px" }}>No tickets found</p>
           ) : (
-            allTickets
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-              .map((ticket) => (
-                <div key={ticket.ticket_id} className="ticket-card" onClick={() => showTicketDetail(ticket.ticket_id)}>
-                  <div className="ticket-info">
-                    <div className="ticket-id">Ticket #{ticket.ticket_id}</div>
-                    <div
-                      className="ticket-email"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        composeEmail(ticket.gmail)
-                      }}
-                    >
-                      {ticket.gmail}
+            <>
+              {console.log("[v0] Admin tickets received:", adminTickets)}
+              {adminTickets
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .map((ticket) => (
+                  <div
+                    key={ticket.ticket_id}
+                    className="ticket-card"
+                    onClick={() => showTicketDetail(ticket.ticket_id)}
+                  >
+                    <div className="ticket-info">
+                      <div className="ticket-id">Ticket #{ticket.ticket_id}</div>
+                      <div
+                        className="ticket-email"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          composeEmail(ticket.gmail)
+                        }}
+                      >
+                        {ticket.gmail}
+                      </div>
+                      <div className="ticket-query-preview">
+                        {ticket.query
+                          ? ticket.query.substring(0, 50) + (ticket.query.length > 50 ? "..." : "")
+                          : "No query provided"}
+                      </div>
                     </div>
-                    <div className="ticket-query-preview">
-                      {ticket.query
-                        ? ticket.query.substring(0, 50) + (ticket.query.length > 50 ? "..." : "")
-                        : "No query provided"}
+                    <div style={{ textAlign: "right" }}>
+                      <div className={`ticket-status ${ticket.status === "open" ? "status-open" : "status-closed"}`}>
+                        {ticket.status || "open"}
+                      </div>
+                      <div className="ticket-date">{new Date(ticket.created_at).toLocaleDateString()}</div>
                     </div>
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div className={`ticket-status ${ticket.status === "open" ? "status-open" : "status-closed"}`}>
-                      {ticket.status || "open"}
-                    </div>
-                    <div className="ticket-date">{new Date(ticket.created_at).toLocaleDateString()}</div>
-                  </div>
-                </div>
-              ))
+                ))}
+            </>
           )}
         </div>
+      </div>
+    )
+  }
+
+  if (!adminCheckDone && currentUser) {
+    return (
+      <div className="activity-container">
+        <p style={{ color: "#6c757d", textAlign: "center", padding: "20px" }}>Checking permissions...</p>
       </div>
     )
   }

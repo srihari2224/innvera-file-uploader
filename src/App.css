@@ -155,15 +155,22 @@ body {
 .nav-item {
   padding: 12px 0;
   color: #888;
-  text-decoration: none;
+  background: none;
+  border: none;
   font-size: 14px;
   border-bottom: 2px solid transparent;
   transition: all 0.2s;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .nav-item.active {
   color: #ededed;
   border-bottom-color: #ededed;
+}
+
+.nav-item:hover:not(.active) {
+  color: #ccc;
 }
 
 /* Main Content */
@@ -1008,7 +1015,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 20px;
-  margin-top: 30px;
+  margin-top: 20px;
   border-top: 1px solid #ddd;
   background: #ffffff;
   border-radius: 8px;
@@ -1115,4 +1122,23 @@ body {
 
 .policy-note strong {
   color: black;
+}
+
+/* Added main page and swipe navigation styles */
+.main-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-container {
+  flex: 1;
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
+}
+
+.section-container:active {
+  cursor: grabbing;
 }

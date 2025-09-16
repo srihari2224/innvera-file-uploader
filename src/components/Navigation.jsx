@@ -1,33 +1,26 @@
-import { Link, useLocation } from "react-router-dom"
+"use client"
 
-const Navigation = () => {
-  const location = useLocation()
-
-  const isActive = (path) => {
-    if (path === "/" || path === "/overview") {
-      return location.pathname === "/" || location.pathname === "/overview"
-    }
-    return location.pathname === path
-  }
+const Navigation = ({ currentSection, onSectionChange }) => {
+  const sections = [
+    { key: "overview", label: "Overview" },
+    { key: "demo", label: "Demo" },
+    { key: "social", label: "Social" },
+    { key: "activity", label: "Activity" },
+    { key: "about", label: "About Us" },
+  ]
 
   return (
     <nav className="nav">
       <div className="nav-content">
-        <Link to="/overview" className={`nav-item ${isActive("/overview") ? "active" : ""}`}>
-          Overview
-        </Link>
-        <Link to="/demo" className={`nav-item ${isActive("/demo") ? "active" : ""}`}>
-          Demo
-        </Link>
-        <Link to="/social" className={`nav-item ${isActive("/social") ? "active" : ""}`}>
-          Social
-        </Link>
-        <Link to="/activity" className={`nav-item ${isActive("/activity") ? "active" : ""}`}>
-          Activity
-        </Link>
-        <Link to="/about" className={`nav-item ${isActive("/about") ? "active" : ""}`}>
-          About Us
-        </Link>
+        {sections.map((section, index) => (
+          <button
+            key={section.key}
+            onClick={() => onSectionChange(index)}
+            className={`nav-item ${currentSection === section.key ? "active" : ""}`}
+          >
+            {section.label}
+          </button>
+        ))}
       </div>
     </nav>
   )

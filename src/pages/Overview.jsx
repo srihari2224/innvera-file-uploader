@@ -2,17 +2,26 @@
 
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
+import { useFiles } from "../context/FilesContext"
 import FilesSection from "../components/FilesSection"
 
 const Overview = () => {
   const [activeTab, setActiveTab] = useState("session")
   const [sessionId, setSessionId] = useState("")
+  const { uploadedFiles, addFile, updateFile } = useFiles()
   const { currentUser } = useAuth()
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
-    const session = urlParams.get("session") || "session" + Math.floor(Math.random() * 1000000)
-    setSessionId(session)
+    const sessionParam = urlParams.get("session")
+
+    if (sessionParam) {
+      // If session parameter exists, use it
+      setSessionId(sessionParam)
+    } else {
+      // If no session parameter, show "default"
+      setSessionId("default")
+    }
   }, [])
 
   const handleFileUpload = () => {
@@ -31,16 +40,38 @@ const Overview = () => {
   const uploadFile = async (file, sessionId) => {
     const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/gif", "image/webp"]
     if (!allowedTypes.includes(file.type)) {
-      addFileCard(file.name, file.type, "error", "File type not supported")
+      const fileData = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+        name: file.name,
+        type: file.type,
+        status: "error",
+        message: "File type not supported",
+      }
+      addFile(fileData)
       return
     }
 
     if (file.size > 50 * 1024 * 1024) {
-      addFileCard(file.name, file.type, "error", "File too large (max 50MB)")
+      const fileData = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+        name: file.name,
+        type: file.type,
+        status: "error",
+        message: "File too large (max 50MB)",
+      }
+      addFile(fileData)
       return
     }
 
-    const fileId = addFileCard(file.name, file.type, "uploading", "Uploading...")
+    const fileId = Date.now().toString() + Math.random().toString(36).substr(2, 5)
+    const fileData = {
+      id: fileId,
+      name: file.name,
+      type: file.type,
+      status: "uploading",
+      message: "Uploading...",
+    }
+    addFile(fileData)
 
     try {
       const res = await fetch(
@@ -61,45 +92,13 @@ const Overview = () => {
       })
 
       if (uploadRes.ok) {
-        updateFileCard(fileId, "success", "Upload complete ✓")
+        updateFile(fileId, { status: "success", message: "Upload complete ✓" })
       } else {
-        updateFileCard(fileId, "error", "Upload failed")
+        updateFile(fileId, { status: "error", message: "Upload failed" })
       }
     } catch (err) {
       console.error("Upload error:", err)
-      updateFileCard(fileId, "error", "Upload failed")
-    }
-  }
-
-  const addFileCard = (fileName, fileType, status, message) => {
-    const filesGrid = document.getElementById("filesGrid")
-    const fileId = Date.now().toString() + Math.random().toString(36).substr(2, 5)
-
-    const fileIcon = fileType.includes("pdf")
-      ? `<img src="/pdf-icon.jpg" alt="PDF">`
-      : `<img src="/image-icon.jpg" alt="Image">`
-
-    const fileCard = document.createElement("div")
-    fileCard.className = "file-card"
-    fileCard.id = `file-${fileId}`
-    fileCard.innerHTML = `
-      <div class="file-icon">${fileIcon}</div>
-      <div class="file-info">
-        <div class="file-name">${fileName}</div>
-        <div class="file-status ${status}">${message}</div>
-      </div>
-    `
-
-    filesGrid.appendChild(fileCard)
-    return fileId
-  }
-
-  const updateFileCard = (fileId, status, message) => {
-    const fileCard = document.getElementById(`file-${fileId}`)
-    if (fileCard) {
-      const statusElement = fileCard.querySelector(".file-status")
-      statusElement.className = `file-status ${status}`
-      statusElement.textContent = message
+      updateFile(fileId, { status: "error", message: "Upload failed" })
     }
   }
 
@@ -207,22 +206,9 @@ const Overview = () => {
         </div>
       </div>
 
-      {/* Added FilesSection component to Overview page */}
-      <FilesSection />
+      <FilesSection uploadedFiles={uploadedFiles} />
 
-      <div className="footer-links">
-        <a href="/terms" className="footer-link">
-          Terms of Service
-        </a>
-        <span className="footer-separator">|</span>
-        <a href="/privacy" className="footer-link">
-          Privacy Policy
-        </a>
-        <span className="footer-separator">|</span>
-        <a href="/refund" className="footer-link">
-          Refund & Cancellation Policy
-        </a>
-      </div>
+      
     </div>
   )
 }

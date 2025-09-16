@@ -15,7 +15,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
-  const [allTickets, setAllTickets] = useState([])
+  const [allTickets, setAllTickets] = useState(null)
 
   useEffect(() => {
     checkExistingAuth()
@@ -62,7 +62,8 @@ export const AuthProvider = ({ children }) => {
     console.log("🔍 === CHECKING ADMIN STATUS ===")
     console.log("📧 Email being checked:", email)
 
-    const requestBody = { gmail: email }
+    const cleanEmail = email.trim().toLowerCase()
+    const requestBody = { gmail: cleanEmail }
     console.log("📤 Request body being sent:", JSON.stringify(requestBody, null, 2))
 
     try {
@@ -83,8 +84,30 @@ export const AuthProvider = ({ children }) => {
         const data = await response.json()
         console.log("✅ API SUCCESS - Data received:")
         console.log("- Full response:", JSON.stringify(data, null, 2))
-        console.log("- Tickets count:", data.tickets?.length || 0)
-        return data
+
+        // Check if this is a Lambda response with internal statusCode
+        if (data.statusCode !== undefined) {
+          console.log("🔍 Lambda response detected, checking internal statusCode:", data.statusCode)
+
+          if (data.statusCode === 200) {
+            // Parse the body which contains the actual data
+            const bodyData = typeof data.body === "string" ? JSON.parse(data.body) : data.body
+            console.log("✅ ADMIN ACCESS GRANTED - Tickets found:", bodyData.tickets?.length || 0)
+            return bodyData
+          } else if (data.statusCode === 403) {
+            console.log("❌ ADMIN ACCESS DENIED - User is not admin")
+            console.log("🔍 Debug info - Email sent:", cleanEmail)
+            console.log("🔍 Debug info - Response body:", data.body)
+            return null
+          } else {
+            console.log("❌ UNEXPECTED LAMBDA STATUS CODE:", data.statusCode)
+            return null
+          }
+        } else {
+          // Direct response format (fallback)
+          console.log("- Tickets count:", data.tickets?.length || 0)
+          return data
+        }
       } else {
         console.log("❌ API FAILED - Response not OK")
         const errorText = await response.text()
