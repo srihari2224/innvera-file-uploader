@@ -7,9 +7,9 @@ const FilesSection = ({ uploadedFiles = [] }) => {
           <div key={file.id} className="file-card">
             <div className="file-icon">
               {file.type.includes("pdf") ? (
-                <img src="/pdf-icon.jpg" alt="PDF" />
+                <img class="pdf" src="/pdf-icon.png" alt="PDF" />
               ) : (
-                <img src="/image-icon.jpg" alt="Image" />
+                <img class="img" src="/image-icon.png" alt="Image" />
               )}
             </div>
             <div className="file-info">

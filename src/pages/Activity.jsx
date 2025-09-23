@@ -12,6 +12,11 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
     query: "",
   })
 
+  const [stockStatus, setStockStatus] = useState(null)
+  const [stockLoading, setStockLoading] = useState(false)
+  const [stockError, setStockError] = useState(null)
+  const [resetLoading, setResetLoading] = useState(false)
+
   useEffect(() => {
     if (currentUser) {
       setFormData((prev) => ({
@@ -21,6 +26,65 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
       }))
     }
   }, [currentUser])
+
+  useEffect(() => {
+    // Only fetch status for admins and for non-admins too if we want status in admin area;
+    // According to requirement, show reset button + status only when admin.
+    if (isAdmin && adminCheckDone) {
+      fetchStockStatus()
+    }
+  }, [isAdmin, adminCheckDone])
+
+  const fetchStockStatus = async () => {
+    setStockLoading(true)
+    setStockError(null)
+    try {
+      const res = await fetch(
+  "https://s8wpc0jx1j.execute-api.ap-south-1.amazonaws.com/prod/getStatus?id=global-stock",
+  {
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+  }
+)
+
+      if (!res.ok) throw new Error(`Status fetch failed: ${res.status}`)
+      const data = await res.json()
+      const parsed = typeof data.body === "string" ? JSON.parse(data.body) : data.body
+      setStockStatus(parsed)
+    } catch (err) {
+      console.error("Error fetching stock status:", err)
+      setStockError("Unable to load paper status")
+    } finally {
+      setStockLoading(false)
+    }
+  }
+
+  const handleReset = async () => {
+    if (!currentUser?.email) {
+      alert("Admin email not available")
+      return
+    }
+    if (!confirm("Reset used count? This action will set used to 0.")) return
+
+    setResetLoading(true)
+    try {
+      const res = await fetch("https://s8wpc0jx1j.execute-api.ap-south-1.amazonaws.com/prod/resetUsed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ by: currentUser.email }),
+      })
+      if (!res.ok) throw new Error(`Reset failed: ${res.status}`)
+      const data = await res.json()
+      const parsed = typeof data.body === "string" ? JSON.parse(data.body) : data.body
+      setStockStatus(parsed)
+      // alert("Reset successful")
+    } catch (err) {
+      console.error("Reset error:", err)
+      alert("Reset failed")
+    } finally {
+      setResetLoading(false)
+    }
+  }
 
   const toggleTicketForm = () => {
     setIsFormExpanded(!isFormExpanded)
@@ -223,8 +287,37 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
     return (
       <div className="activity-container admin-activity">
         <h2 style={{ color: "black", marginBottom: "20px", fontSize: "18px", fontWeight: "600" }}>
+          Admin - Paper Reset
+        </h2>
+        {/* Admin reset/status block above admin support tickets */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+          {/* <div style={{ color: "white", fontSize: "14px" }}>
+            {stockLoading ? (
+              "Loading paper status..."
+            ) : stockError ? (
+              <span style={{ color: "#ff6b6b" }}>{stockError}</span>
+            ) : stockStatus ? (
+              <span>
+                <strong>Paper status</strong> &nbsp;—&nbsp; capacity: {stockStatus.capacity} , left: {stockStatus.left}
+              </span>
+            ) : (
+              <span>No paper status</span>
+            )}
+          </div> */}
+          <div>
+            <button
+              onClick={handleReset}
+              disabled={resetLoading}
+              style={{ background: "#ffffffff", color: "#000000ff", padding: "6px 10px", borderRadius: 5, border: "none",marginLeft:130 , cursor: "pointer" }}
+            >
+              {resetLoading ? "Resetting..." : "Reset"}
+            </button>
+          </div>
+        </div>
+        <h2 style={{ color: "black", marginBottom: "20px", fontSize: "18px", fontWeight: "600" }}>
           Admin - Support Tickets
         </h2>
+
         <div id="ticketsList">
           {adminTickets === null ? (
             <p style={{ color: "#6c757d", textAlign: "center", padding: "20px" }}>Loading tickets...</p>
@@ -343,9 +436,8 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
                   onDragOver={handleImageDragOver}
                   onDragLeave={handleImageDragLeave}
                 >
-                  <div className="upload-icon">📁</div>
-                  <div className="upload-text">Click to upload or drag and drop</div>
-                  <div className="upload-subtext">PNG, JPG, GIF up to 5MB each (Max 3 images)</div>
+
+                  <div className="upload-subtext">PNG, JPG, GIF up to 5MB each (Max 5 images)</div>
                 </div>
                 <input
                   type="file"

@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
 
 const Header = () => {
   const { currentUser, signOut } = useAuth()
+  const [showLogout, setShowLogout] = useState(false)
 
   useEffect(() => {
     if (currentUser && typeof window.google !== "undefined" && window.google.accounts && window.google.accounts.id) {
@@ -34,10 +35,13 @@ const Header = () => {
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <img className="innvera" src="/innvera-logo.jpg" alt="INNVERA" />
+            <img className="innvera" src="/innvera-logo.png" alt="INNVERA" />
           </div>
           <div className="header-actions">
-            <div className="auth-section">
+            <div
+              className="auth-section"
+              onClick={() => currentUser && setShowLogout(!showLogout)}
+            >
               <div className={`user-info ${currentUser ? "visible" : ""}`} id="userInfo">
                 <img
                   className="user-avatar"
@@ -48,9 +52,11 @@ const Header = () => {
                 <span className="user-name" id="userName">
                   {currentUser?.name}
                 </span>
-                <button className="sign-out-btn" onClick={signOut}>
-                  Sign Out
-                </button>
+                {showLogout && (
+                  <button className="sign-out-btn" onClick={signOut}>
+                    Sign Out
+                  </button>
+                )}
               </div>
               <div className="google-signin-container" style={{ display: currentUser ? "none" : "flex" }}>
                 <div
@@ -64,17 +70,7 @@ const Header = () => {
                 ></div>
               </div>
             </div>
-            <button className="header-btn" aria-label="Menu">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M3 6h18M3 12h18M3 18h18"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+            
           </div>
         </div>
       </header>

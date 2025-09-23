@@ -34,9 +34,9 @@ function MainPage() {
       case 1:
         return <Demo {...commonProps} />
       case 2:
-        return <Social {...commonProps} />
-      case 3:
         return <Activity {...commonProps} />
+      case 3:
+        return <Social {...commonProps} />
       case 4:
         return <About {...commonProps} />
       default:

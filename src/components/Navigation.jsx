@@ -2,10 +2,10 @@
 
 const Navigation = ({ currentSection, onSectionChange }) => {
   const sections = [
-    { key: "overview", label: "Overview" },
+    { key: "overview", label: "Print IT" },
     { key: "demo", label: "Demo" },
-    { key: "social", label: "Social" },
-    { key: "activity", label: "Activity" },
+    { key: "social", label: "Support" },
+    { key: "activity", label: "Social" },
     { key: "about", label: "About Us" },
   ]
 

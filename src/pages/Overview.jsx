@@ -4,25 +4,86 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useFiles } from "../context/FilesContext"
 import FilesSection from "../components/FilesSection"
+import PaperStockPie from "../components/PaperStockPie" // Import the new Pie chart component
 
 const Overview = () => {
   const [activeTab, setActiveTab] = useState("session")
   const [sessionId, setSessionId] = useState("")
+  const [currentTextIndex, setCurrentTextIndex] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
   const { uploadedFiles, addFile, updateFile } = useFiles()
   const { currentUser } = useAuth()
+
+  const [stockStatus, setStockStatus] = useState(null)
+  const [stockLoading, setStockLoading] = useState(false)
+  const [stockError, setStockError] = useState(null)
+
+  const textContent = [
+    " ",
+    <>Welcome to<span style={{ color: "#007bff" }}> printIT</span> KIOSK 24/7 LIVE ON</>,
+    "Upload your files safely and manage them with ease.",
+    "Supported formats: PDF, JPEG, PNG",
+    "Start by choosing files above to begin your upload session",
+    "Experience seamless file management with advanced security features",
+    "Your files are securely encrypted and fully protected, ensuring complete privacy and safety",
+  ]
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const sessionParam = urlParams.get("session")
 
     if (sessionParam) {
-      // If session parameter exists, use it
       setSessionId(sessionParam)
     } else {
-      // If no session parameter, show "default"
       setSessionId("default")
     }
+
+    const startAnimation = setTimeout(() => {
+      setIsAnimating(true)
+      startTextCycle()
+    }, 500)
+
+    // fetch paper stock status on mount
+    fetchStockStatus()
+
+    return () => clearTimeout(startAnimation)
   }, [])
+
+  const fetchStockStatus = async () => {
+    setStockLoading(true)
+    setStockError(null)
+    try {
+      const res = await fetch(
+            "https://s8wpc0jx1j.execute-api.ap-south-1.amazonaws.com/prod/getStatus?id=global-stock",
+            {
+              method: "GET",
+              headers: { "Content-Type": "application/json" }
+            }
+          )
+
+      if (!res.ok) throw new Error(`Status fetch failed: ${res.status}`)
+      const data = await res.json()
+      // API returns body as a JSON-string field per example, parse it
+      const parsed = typeof data.body === "string" ? JSON.parse(data.body) : data.body
+      setStockStatus(parsed)
+    } catch (err) {
+      console.error("Error fetching stock status:", err)
+      setStockError("Unable to load paper status")
+    } finally {
+      setStockLoading(false)
+    }
+  }
+
+  const startTextCycle = () => {
+    const interval = setInterval(() => {
+      setCurrentTextIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % textContent.length
+        return nextIndex
+      })
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }
 
   const handleFileUpload = () => {
     document.getElementById("fileInput").click()
@@ -139,6 +200,8 @@ const Overview = () => {
       placeholder.style.color = "#666"
     }
   }
+  
+  const hasFiles = uploadedFiles && uploadedFiles.length > 0
 
   return (
     <div className="overview-container">
@@ -206,9 +269,31 @@ const Overview = () => {
         </div>
       </div>
 
-      <FilesSection uploadedFiles={uploadedFiles} />
+      {hasFiles ? (
+        <FilesSection uploadedFiles={uploadedFiles} />
+      ) : (
+        <div className="sequential-text-section">
+          <div className={`sequential-text-container ${isAnimating ? "active" : ""}`}>
+            <p key={currentTextIndex} className="sequential-text">
+              {textContent[currentTextIndex]}
+            </p>
+          </div>
 
-      
+          
+        </div>
+      )}
+
+      <div className="paper-status" style={{ marginTop: "18px", color: "#ededed", fontSize: "14px" }}>
+            {stockLoading ? (
+              <div>Loading paper status...</div>
+            ) : stockError ? (
+              <div style={{ color: "#ff6b6b" }}>{stockError}</div>
+            ) : stockStatus ? (
+              <PaperStockPie capacity={stockStatus.capacity} left={stockStatus.left} />
+            ) : (
+              <div>No paper status available</div>
+            )}
+      </div>
     </div>
   )
 }
