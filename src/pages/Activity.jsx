@@ -268,10 +268,10 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
       </div>
       <div style="margin-bottom: 15px;">
         <strong>Created:</strong> ${new Date(ticket.created_at).toLocaleString()}
-      </div>
+      </div>3
       <div style="margin-bottom: 15px;">
         <strong>Query:</strong>
-        <div style="background: #f8f9fa; padding: 10px; border-radius: 4px; margin-top: 5px; white-space: pre-wrap;">${ticket.query || "No query provided"}</div>
+        <div style="background: #000000ff; padding: 10px; border-radius: 4px; margin-top: 5px; white-space: pre-wrap;">${ticket.query || "No query provided"}</div>
       </div>
       ${imagesHtml}
     `

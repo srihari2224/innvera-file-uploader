@@ -19,8 +19,8 @@ const PaperStockPie = ({ capacity = 0, left = 0, size = 80, strokeWidth = 16 }) 
     gap: 16,
     color: "#ededed",
     fontSize: 14,
-    marginTop: 30,
-    marginLeft:10
+    marginTop: 40,
+    marginLeft:20
   }
 
   const legendItem = (color, label) => (

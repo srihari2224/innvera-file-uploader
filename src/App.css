@@ -486,7 +486,7 @@ body {
 }
 
 .file-icon img {
-  width: 24px;
+  width: 28px;
   height: 28px;
   opacity: 0.8;
 }
@@ -1060,7 +1060,7 @@ body {
 }
 
 .ticket-detail-content {
-  background: #111111;
+  background: #333333;
   margin: 5% auto;
   padding: 24px;
   border-radius: 12px;
@@ -1071,7 +1071,9 @@ body {
   color: #ededed;
   border: 1px solid #333333;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  margin-top:150px;
 }
+
 
 .ticket-detail-header {
   display: flex;
