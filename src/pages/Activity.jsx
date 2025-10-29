@@ -17,6 +17,11 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
   const [stockError, setStockError] = useState(null)
   const [resetLoading, setResetLoading] = useState(false)
 
+  // ============ CHANGE 1: Add submission modal states ============
+  const [showSubmissionModal, setShowSubmissionModal] = useState(false)
+  const [submissionStatus, setSubmissionStatus] = useState("idle") // idle, submitting, success, error
+  // ================================================================
+
   useEffect(() => {
     if (currentUser) {
       setFormData((prev) => ({
@@ -28,8 +33,6 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
   }, [currentUser])
 
   useEffect(() => {
-    // Only fetch status for admins and for non-admins too if we want status in admin area;
-    // According to requirement, show reset button + status only when admin.
     if (isAdmin && adminCheckDone) {
       fetchStockStatus()
     }
@@ -77,7 +80,6 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
       const data = await res.json()
       const parsed = typeof data.body === "string" ? JSON.parse(data.body) : data.body
       setStockStatus(parsed)
-      // alert("Reset successful")
     } catch (err) {
       console.error("Reset error:", err)
       alert("Reset failed")
@@ -139,7 +141,7 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
           file: file,
           dataUrl: e.target.result,
           name: file.name,
-          type: file.type, // Add file type for proper handling
+          type: file.type,
         }
 
         setTicketImages((prev) => [...prev, imageData])
@@ -154,13 +156,13 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
 
   const fixS3Url = (url) => {
     if (!url) return url
-    // Convert old format to new format
     if (url.includes("s3.amazonaws.com/innvera-tickets/")) {
       return url.replace("s3.amazonaws.com/innvera-tickets/", "innvera-tickets.s3.amazonaws.com/")
     }
     return url
   }
 
+  // ============ CHANGE 2: Update submitTicket function ============
   const submitTicket = async (event) => {
     event.preventDefault()
 
@@ -168,6 +170,10 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
       alert("Please sign in to submit a ticket")
       return
     }
+
+    // Show modal with submitting status
+    setShowSubmissionModal(true)
+    setSubmissionStatus("submitting")
 
     try {
       let sessionIdForTicket
@@ -178,7 +184,6 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
         sessionIdForTicket = "session" + Math.floor(Math.random() * 1000000)
       }
 
-      // Prepare images as base64 data for upload to Lambda
       const imagesForUpload = await Promise.all(
         ticketImages.map(async (img) => {
           return {
@@ -195,7 +200,7 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
         name: currentUser.name,
         phone_number: formData.phone,
         query: formData.query,
-        images: imagesForUpload, // Send base64 images to Lambda for processing
+        images: imagesForUpload,
       }
 
       console.log("[v0] Submitting ticket with session_id:", sessionIdForTicket)
@@ -214,20 +219,34 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
         const result = await response.json()
         console.log("[v0] Ticket submitted successfully:", result)
 
-        setFormData({ phone: "", query: "", email: currentUser.email, name: currentUser.name })
-        setTicketImages([])
-        setIsFormExpanded(false)
+        // Show success status
+        setSubmissionStatus("success")
+        
+        // Reset form after 2 seconds and close modal
+        setTimeout(() => {
+          setFormData({ phone: "", query: "", email: currentUser.email, name: currentUser.name })
+          setTicketImages([])
+          setIsFormExpanded(false)
+          setShowSubmissionModal(false)
+          setSubmissionStatus("idle")
+        }, 2000)
 
-        alert("Ticket submitted successfully!")
       } else {
         const errorData = await response.json()
         throw new Error(errorData.message || "Failed to submit ticket")
       }
     } catch (error) {
       console.error("[v0] Error submitting ticket:", error)
-      alert("Error submitting ticket. Please try again.")
+      setSubmissionStatus("error")
+      
+      // Close modal after 3 seconds on error
+      setTimeout(() => {
+        setShowSubmissionModal(false)
+        setSubmissionStatus("idle")
+      }, 3000)
     }
   }
+  // ================================================================
 
   const showTicketDetail = (ticketId) => {
     const ticket = (adminTickets || []).find((t) => t.ticket_id === ticketId)
@@ -268,7 +287,7 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
       </div>
       <div style="margin-bottom: 15px;">
         <strong>Created:</strong> ${new Date(ticket.created_at).toLocaleString()}
-      </div>3
+      </div>
       <div style="margin-bottom: 15px;">
         <strong>Query:</strong>
         <div style="background: #000000ff; padding: 10px; border-radius: 4px; margin-top: 5px; white-space: pre-wrap;">${ticket.query || "No query provided"}</div>
@@ -289,21 +308,7 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
         <h2 style={{ color: "black", marginBottom: "20px", fontSize: "18px", fontWeight: "600" }}>
           Admin - Paper Reset
         </h2>
-        {/* Admin reset/status block above admin support tickets */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-          {/* <div style={{ color: "white", fontSize: "14px" }}>
-            {stockLoading ? (
-              "Loading paper status..."
-            ) : stockError ? (
-              <span style={{ color: "#ff6b6b" }}>{stockError}</span>
-            ) : stockStatus ? (
-              <span>
-                <strong>Paper status</strong> &nbsp;—&nbsp; capacity: {stockStatus.capacity} , left: {stockStatus.left}
-              </span>
-            ) : (
-              <span>No paper status</span>
-            )}
-          </div> */}
           <div>
             <button
               onClick={handleReset}
@@ -428,7 +433,7 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
               </div>
 
               <div className="image-upload-group">
-                <label>Attach Images (Optional):</label>
+                <label>Attach Payment slip(Optional):</label>
                 <div
                   className="image-upload-container"
                   onClick={() => document.getElementById("ticketImageInput").click()}
@@ -437,7 +442,7 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
                   onDragLeave={handleImageDragLeave}
                 >
 
-                  <div className="upload-subtext">PNG, JPG, GIF up to 5MB each (Max 5 images)</div>
+                  <div className="upload-subtext">PNG, JPG  up to 5MB each (Max 5 images)</div>
                 </div>
                 <input
                   type="file"
@@ -466,6 +471,93 @@ const Activity = ({ sessionFromUrl, isAdmin, adminCheckDone, adminTickets }) => 
           )}
         </div>
       </div>
+
+      {/* ============ CHANGE 3: Add Submission Modal ============ */}
+      {showSubmissionModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0, 0, 0, 0.8)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: "#1a1a1a",
+            border: "1px solid #333333",
+            borderRadius: "12px",
+            padding: "32px",
+            minWidth: "300px",
+            textAlign: "center",
+          }}>
+            {submissionStatus === "submitting" && (
+              <>
+                <div style={{
+                  width: "50px",
+                  height: "50px",
+                  border: "4px solid #333333",
+                  borderTop: "4px solid #ededed",
+                  borderRadius: "50%",
+                  animation: "spin 1s linear infinite",
+                  margin: "0 auto 20px",
+                }}></div>
+                <h3 style={{ color: "#ededed", marginBottom: "8px", fontSize: "18px" }}>Submitting Ticket...</h3>
+                <p style={{ color: "#888", fontSize: "14px" }}>Please wait while we process your request</p>
+              </>
+            )}
+            
+            {submissionStatus === "success" && (
+              <>
+                <div style={{
+                  width: "50px",
+                  height: "50px",
+                  background: "#28a745",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 20px",
+                  fontSize: "30px",
+                  color: "white",
+                }}>✓</div>
+                <h3 style={{ color: "#ededed", marginBottom: "8px", fontSize: "18px" }}>Ticket Submitted!</h3>
+                <p style={{ color: "#888", fontSize: "14px" }}>Your ticket has been successfully submitted</p>
+              </>
+            )}
+            
+            {submissionStatus === "error" && (
+              <>
+                <div style={{
+                  width: "50px",
+                  height: "50px",
+                  background: "#ff4444",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 20px",
+                  fontSize: "30px",
+                  color: "white",
+                }}>✕</div>
+                <h3 style={{ color: "#ededed", marginBottom: "8px", fontSize: "18px" }}>Submission Failed</h3>
+                <p style={{ color: "#888", fontSize: "14px" }}>Please try again later</p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+      {/* ======================================================== */}
+
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }

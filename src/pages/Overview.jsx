@@ -218,7 +218,7 @@ const Overview = () => {
               className={`tab-btn ${activeTab === "coupen" ? "active" : ""}`}
               onClick={() => setActiveTab("coupen")}
             >
-              Coupens
+              Coupons
             </button>
           </div>
         </div>
