@@ -35,7 +35,14 @@ const Header = () => {
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <img className="innvera" src="/innvera-logo.png" alt="INNVERA" />
+            <video 
+            src={"stars.mp4"} 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            className="navbar-video"
+          ></video>
           </div>
           <div className="header-actions">
             <div

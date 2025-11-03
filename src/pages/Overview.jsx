@@ -4,7 +4,135 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useFiles } from "../context/FilesContext"
 import FilesSection from "../components/FilesSection"
-import PaperStockPie from "../components/PaperStockPie" // Import the new Pie chart component
+import PaperStockPie from "../components/PaperStockPie"
+
+// Out of Paper Popup Component
+const OutOfPaperPopup = ({ onClose }) => {
+  return (
+    <>
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0, 0, 0, 0.75)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          animation: "fadeIn 0.2s ease"
+        }}
+        onClick={onClose}
+      >
+        <div
+          style={{
+            background: "linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%)",
+            borderRadius: 16,
+            padding: "40px 50px",
+            maxWidth: 450,
+            width: "90%",
+            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
+            border: "1px solid #ff6b6b",
+            textAlign: "center",
+            animation: "slideUp 0.3s ease"
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            style={{
+              width: 80,
+              height: 80,
+              margin: "0 auto 20px",
+              background: "linear-gradient(135deg, #ff6b6b, #ee5a52)",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 20px rgba(255, 107, 107, 0.4)"
+            }}
+          >
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </div>
+
+          <h2
+            style={{
+              color: "#fff",
+              fontSize: 26,
+              fontWeight: 700,
+              margin: "0 0 12px 0"
+            }}
+          >
+            Paper Stack Empty
+          </h2>
+
+          <p
+            style={{
+              color: "#bbb",
+              fontSize: 16,
+              lineHeight: 1.6,
+              margin: "0 0 30px 0"
+            }}
+          >
+            Kiosk currently out of paper. paper Refill will be done within 30-60 min.
+          </p>
+
+          <button
+            onClick={onClose}
+            style={{
+              background: "linear-gradient(135deg, #007bff, #0056b3)",
+              color: "white",
+              border: "none",
+              padding: "14px 40px",
+              borderRadius: 8,
+              fontSize: 16,
+              fontWeight: 600,
+              cursor: "pointer",
+              boxShadow: "0 4px 15px rgba(0, 123, 255, 0.3)",
+              transition: "all 0.2s ease"
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "translateY(-2px)"
+              e.target.style.boxShadow = "0 6px 20px rgba(0, 123, 255, 0.4)"
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0)"
+              e.target.style.boxShadow = "0 4px 15px rgba(0, 123, 255, 0.3)"
+            }}
+          >
+            Got it
+          </button>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+    </>
+  )
+}
 
 const Overview = () => {
   const [activeTab, setActiveTab] = useState("session")
@@ -17,15 +145,18 @@ const Overview = () => {
   const [stockStatus, setStockStatus] = useState(null)
   const [stockLoading, setStockLoading] = useState(false)
   const [stockError, setStockError] = useState(null)
+  const [showOutOfPaperPopup, setShowOutOfPaperPopup] = useState(false)
 
   const textContent = [
     " ",
-    <>Welcome to<span style={{ color: "#007bff" }}> printIT</span> KIOSK 24/7 LIVE ON</>,
+    <>
+      Welcome to<span style={{ color: "#007bff" }}> printIT</span> KIOSK 24/7 LIVE ON
+    </>,
     "Upload your files safely and manage them with ease.",
     "Supported formats: PDF, JPEG, PNG",
     "Start by choosing files above to begin your upload session",
     "Experience seamless file management with advanced security features",
-    "Your files are securely encrypted and fully protected, ensuring complete privacy and safety",
+    "Your files are securely encrypted and fully protected, ensuring complete privacy and safety"
   ]
 
   useEffect(() => {
@@ -54,12 +185,12 @@ const Overview = () => {
     setStockError(null)
     try {
       const res = await fetch(
-            "https://s8wpc0jx1j.execute-api.ap-south-1.amazonaws.com/prod/getStatus?id=global-stock",
-            {
-              method: "GET",
-              headers: { "Content-Type": "application/json" }
-            }
-          )
+        "https://s8wpc0jx1j.execute-api.ap-south-1.amazonaws.com/prod/getStatus?id=global-stock",
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" }
+        }
+      )
 
       if (!res.ok) throw new Error(`Status fetch failed: ${res.status}`)
       const data = await res.json()
@@ -85,7 +216,20 @@ const Overview = () => {
     return () => clearInterval(interval)
   }
 
+  // Check if paper is empty
+  const isPaperEmpty = () => {
+    if (!stockStatus) return false
+    const capacity = Number(stockStatus.capacity) || 0
+    const left = Number(stockStatus.left) || 0
+    return capacity > 0 && left <= 0
+  }
+
   const handleFileUpload = () => {
+    // Check if paper is empty before opening file dialog
+    if (isPaperEmpty()) {
+      setShowOutOfPaperPopup(true)
+      return
+    }
     document.getElementById("fileInput").click()
   }
 
@@ -106,7 +250,7 @@ const Overview = () => {
         name: file.name,
         type: file.type,
         status: "error",
-        message: "File type not supported",
+        message: "File type not supported"
       }
       addFile(fileData)
       return
@@ -118,7 +262,7 @@ const Overview = () => {
         name: file.name,
         type: file.type,
         status: "error",
-        message: "File too large (max 50MB)",
+        message: "File too large (max 50MB)"
       }
       addFile(fileData)
       return
@@ -130,13 +274,15 @@ const Overview = () => {
       name: file.name,
       type: file.type,
       status: "uploading",
-      message: "Uploading...",
+      message: "Uploading..."
     }
     addFile(fileData)
 
     try {
       const res = await fetch(
-        `https://upload-backend-api.vercel.app/api/get-upload-url?session=${sessionId}&filename=${encodeURIComponent(file.name)}&type=${encodeURIComponent(file.type)}`,
+        `https://upload-backend-api.vercel.app/api/get-upload-url?session=${sessionId}&filename=${encodeURIComponent(
+          file.name
+        )}&type=${encodeURIComponent(file.type)}`
       )
 
       if (!res.ok) {
@@ -149,7 +295,7 @@ const Overview = () => {
       const uploadRes = await fetch(url, {
         method: "PUT",
         headers: { "Content-Type": file.type },
-        body: file,
+        body: file
       })
 
       if (uploadRes.ok) {
@@ -200,11 +346,14 @@ const Overview = () => {
       placeholder.style.color = "#666"
     }
   }
-  
+
   const hasFiles = uploadedFiles && uploadedFiles.length > 0
 
   return (
     <div className="overview-container">
+      {/* Out of Paper Popup */}
+      {showOutOfPaperPopup && <OutOfPaperPopup onClose={() => setShowOutOfPaperPopup(false)} />}
+
       <div className="tabbed-section">
         <div className="tab-header">
           <div className="tabs">
@@ -230,7 +379,14 @@ const Overview = () => {
             </div>
             <div className="choose-files-container">
               <img src="/folder-icon.png" alt="Folder" className="files-icon" />
-              <button className="choose-files-btn" onClick={handleFileUpload}>
+              <button
+                className={`choose-files-btn ${isPaperEmpty() ? "disabled" : ""}`}
+                onClick={handleFileUpload}
+                style={{
+                  opacity: isPaperEmpty() ? 0.5 : 1,
+                  cursor: isPaperEmpty() ? "not-allowed" : "pointer"
+                }}
+              >
                 Choose Files
               </button>
             </div>
@@ -278,21 +434,19 @@ const Overview = () => {
               {textContent[currentTextIndex]}
             </p>
           </div>
-
-          
         </div>
       )}
 
       <div className="paper-status" style={{ marginTop: "18px", color: "#ededed", fontSize: "14px" }}>
-            {stockLoading ? (
-              <div>Loading paper status...</div>
-            ) : stockError ? (
-              <div style={{ color: "#ff6b6b" }}>{stockError}</div>
-            ) : stockStatus ? (
-              <PaperStockPie capacity={stockStatus.capacity} left={stockStatus.left} />
-            ) : (
-              <div>No paper status available</div>
-            )}
+        {stockLoading ? (
+          <div>Loading paper status...</div>
+        ) : stockError ? (
+          <div style={{ color: "#ff6b6b" }}>{stockError}</div>
+        ) : stockStatus ? (
+          <PaperStockPie capacity={stockStatus.capacity} left={stockStatus.left} />
+        ) : (
+          <div>No paper status available</div>
+        )}
       </div>
     </div>
   )

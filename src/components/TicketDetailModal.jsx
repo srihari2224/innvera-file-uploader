@@ -28,7 +28,7 @@ const TicketDetailModal = () => {
           <button className="close-detail" onClick={closeTicketDetail}>
             &times;
           </button>
-        </div>
+        </div>-
         <div id="ticketDetailBody"></div>
       </div>
     </div>
