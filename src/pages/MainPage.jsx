@@ -48,9 +48,9 @@ function MainPage() {
       case 0:
         return <Overview {...commonProps} />
       case 1:
-        return <Demo {...commonProps} />
-      case 2:
         return <Activity {...commonProps} />
+      case 2:
+        return <Demo {...commonProps} />
       case 3:
         return <Social {...commonProps} />
       case 4:

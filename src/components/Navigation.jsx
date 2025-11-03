@@ -2,28 +2,41 @@
 
 const Navigation = ({ currentSection, onSectionChange }) => {
   const sections = [
-    { key: "overview", label: "Print IT" },
-    { key: "demo", label: "Demo" },
-    { key: "social", label: "Support" },
+    { key: "overview", img: "/rocket.svg" },
+    { key: "demo", img: "/ticket.png" },
+    { key: "social", label: "Demo" },
     { key: "activity", label: "Social" },
-    { key: "about", label: "About Us" },
-  ]
+    { key: "about", label: "About us" },
+  ];
 
   return (
     <nav className="nav">
-      <div className="nav-content">
+      <div className="nav-content flex justify-around items-center p-4 bg-black">
         {sections.map((section, index) => (
           <button
             key={section.key}
             onClick={() => onSectionChange(index)}
-            className={`nav-item ${currentSection === section.key ? "active" : ""}`}
+            className={`nav-item p-2 ${
+              currentSection === index ? "opacity-100" : "opacity-60"
+            } hover:opacity-100 transition`}
           >
-            {section.label}
+            {section.img ? (
+              <img
+                src={section.img}
+                alt={section.key}
+                width={37}
+                height={37}
+                style={{ marginLeft: "10px" }}
+                className="object-contain"
+              />
+            ) : (
+              <span className="text-white font-medium">{section.label}</span>
+            )}
           </button>
         ))}
       </div>
     </nav>
-  )
-}
+  );
+};
 
-export default Navigation
+export default Navigation;
