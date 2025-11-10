@@ -26,7 +26,7 @@ const Navigation = ({ currentSection, onSectionChange }) => {
                 alt={section.key}
                 width={37}
                 height={37}
-                style={{ marginLeft: "10px" }}
+                style={{ marginLeft: "2px" }}
                 className="object-contain"
               />
             ) : (
